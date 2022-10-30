@@ -1,0 +1,40 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres
+spec:
+  selector:
+    matchLabels:
+      app: postgres
+  replicas: 1
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: postgres
+    spec:
+      containers:
+        - name: master
+          image: postgres:11.4
+          imagePullPolicy: Always
+          resources:
+            requests:
+              cpu: 10m
+              memory: 25Mi
+            limits:
+              cpu: 250m
+              memory: 128Mi
+          ports:
+            - containerPort: 5432
+          envFrom:
+            - secretRef:
+                name: postgres
+          volumeMounts:
+            - mountPath: /var/lib/postgres
+              name: postgres-data
+      volumes:
+        - name: postgres-data
+          persistentVolumeClaim:
+            claimName: postgres-pvc
